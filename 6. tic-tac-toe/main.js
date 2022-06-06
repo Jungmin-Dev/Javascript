@@ -3,12 +3,15 @@ let turn = 'O';
 const $table = document.createElement('table');
 const $result = document.createElement('div');
 const rows = [];
+let Random1 = Math.floor(Math.random() * 3);
+let Random2 = Math.floor(Math.random() * 3);
 
 for (let i = 0; i < 3; i++) {
   data.push([]);
 }
 
 const callback = (event) => {
+  turn = 'O';
   if (event.target.textContent) {
     console.log('빈칸이 아닙니다.');
     return;
@@ -22,16 +25,33 @@ const callback = (event) => {
     return;
   }
   // 무승부 검사
-  const draw = rows.flat().every((cell) => cell.textContent);
+  let draw = rows.flat().every((cell) => cell.textContent);
   if (draw) {
     $result.textContent = `무승부`;
     return;
   }
 
-  if (turn === 'O') {
-    turn = 'X';
-  } else if (turn === 'X') {
-    turn = 'O';
+  turn = 'X';
+  if (!rows[Random1][Random2].textContent) {
+    rows[Random1][Random2].textContent = turn;
+  } else if (rows[Random1][Random2].textContent) {
+    while (rows[Random1][Random2].textContent) {
+      Random1 = Math.floor(Math.random() * 3);
+      Random2 = Math.floor(Math.random() * 3);
+    }
+    rows[Random1][Random2].textContent = turn;
+  }
+  // 승부 판단하기
+  if (checkWinner(rows[Random1][Random2])) {
+    $result.textContent = `${turn}님이 승리`;
+    $table.removeEventListener('click', callback);
+    return;
+  }
+  // 무승부 검사
+  draw = rows.flat().every((cell) => cell.textContent);
+  if (draw) {
+    $result.textContent = `무승부`;
+    return;
   }
 };
 
@@ -43,7 +63,6 @@ const callback = (event) => {
 const checkWinner = (target) => {
   const rowIndex = target.parentNode.rowIndex;
   const cellIndex = target.cellIndex;
-
   // 세칸 다 채워졌나?
   let hasWinner = false;
   // 가로줄 검사
