@@ -1,12 +1,26 @@
 const $wrapper = document.querySelector('#wrapper');
 
-const total = 12;
+const total = parseInt(prompt('카드 개수를 짝수로 입력하세요(최대20).'));
 
-const colors = ['red', 'orange', 'yellow', 'green', 'white', 'pink'];
-let colorCopy = colors.concat(colors);
+const colors = [
+  'red',
+  'orange',
+  'yellow',
+  'green',
+  'white',
+  'pink',
+  'cyan',
+  'violet',
+  'gray',
+  'black',
+];
+let colorSlice = colors.slice(0, total / 2);
+let colorCopy = colorSlice.concat(colorSlice);
 let shuffled = [];
 let clicked = [];
 let completed = [];
+let clickable = false;
+let startTime;
 function shuffle() {
   for (let i = 0; colorCopy.length > 0; i++) {
     const randomIndex = Math.floor(Math.random() * colorCopy.length);
@@ -32,6 +46,9 @@ function createCard(i) {
 }
 
 function onClickCard() {
+  if (!clickable || completed.includes(this) || clicked[0] === this) {
+    return;
+  }
   this.classList.toggle('flipped');
   clicked.push(this);
   if (clicked.length !== 2) {
@@ -46,18 +63,25 @@ function onClickCard() {
     completed.push(clicked[1]);
     clicked = [];
     if (completed.length !== total) return;
-    alert(`축하합니다!`);
+    setTimeout(() => {
+      const endTime = new Date();
+      console.log(endTime + ', \n' + startTime);
+      alert(`축하합니다! ${(endTime - startTime) / 1000} 초 걸렸습니다.`);
+      resetGame();
+    }, 1000);
     return;
   }
-
+  clickable = false;
   setTimeout(() => {
     clicked[0].classList.remove('flipped');
     clicked[1].classList.remove('flipped');
     clicked = [];
+    clickable = true;
   }, 800);
 }
 
 function startGame() {
+  clickable = false;
   shuffle();
   for (let i = 0; i < total; i++) {
     const card = createCard(i);
@@ -74,7 +98,17 @@ function startGame() {
     document.querySelectorAll('.card').forEach((card) => {
       card.classList.remove('flipped');
     });
+    clickable = true;
+    startTime = new Date();
   }, 5000);
+}
+
+function resetGame() {
+  $wrapper.innerHTML = '';
+  colorCopy = colors.concat(colors);
+  shuffled = [];
+  completed = [];
+  startGame();
 }
 
 startGame();
